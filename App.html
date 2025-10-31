@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق تدوين الملاحظات من الفيديو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --border-radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding-bottom: 80px; /* مساحة للقائمة السفلية */
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 0;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-left: 8px;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .video-section, .notes-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        .section-title i {
+            margin-left: 8px;
+        }
+        
+        .video-url-input {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .video-url-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px 0 0 8px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+        }
+        
+        .video-url-input button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 15px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .video-url-input button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* نسبة 16:9 */
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .time-display {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .note-form {
+            margin-bottom: 15px;
+        }
+        
+        .note-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+        }
+        
+        .form-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .category-select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #3aa8d0;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d41c6b;
+        }
+        
+        .notes-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .note-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-right: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+        
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .note-time {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .note-time:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .note-category {
+            background-color: #e9ecef;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .note-content {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .note-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .note-actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-edit {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .export-options {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #6c757d;
+            font-size: 12px;
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .empty-notes {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        .empty-notes i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        /* تحسينات للشاشات الصغيرة جدًا */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .video-section, .notes-section {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .note-header {
+                flex-direction: column;
+            }
+            
+            .note-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .note-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+        
+        /* تحسينات للوضع الأفقي */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                flex-direction: row;
+            }
+            
+            .video-section {
+                flex: 1;
+            }
+            
+            .notes-section {
+                flex: 1;
+            }
+            
+            .notes-list {
+                max-height: 250px;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 800px;
+            }
+            
+            .form-controls {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .export-options {
+                flex-direction: row;
+            }
+        }
+        
+        /* تحسينات للوصول */
+        .btn:focus, .note-time:focus, input:focus, textarea:focus, select:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        /* تحسينات الأداء */
+        .video-container video {
+            object-fit: contain;
+        }
+        
+        /* تحسينات للرسوم المتحركة */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .note-item {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-video"></i>
+                    <span>ملاحظاتي من الفيديو</span>
+                </div>
+                <button class="menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <section class="video-section">
+                <h2 class="section-title">
+                    <i class="fas fa-play-circle"></i>
+                    <span>مشغل الفيديو</span>
+                </h2>
+                
+                <div class="video-url-input">
+                    <input type="text" id="videoUrl" placeholder="أدخل رابط الفيديو من YouTube أو غيرها">
+                    <button id="loadVideo">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="video-container">
+                    <video id="videoPlayer" controls playsinline>
+                        <source src="" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>
+                
+                <div class="video-controls">
+                    <button id="captureTime" class="btn btn-primary">
+                        <i class="fas fa-clock"></i>
+                        <span>تحديد الوقت الحالي</span>
+                    </button>
+                    <span id="currentTime" class="time-display">00:00:00</span>
+                </div>
+                
+                <div class="note-form">
+                    <textarea id="noteText" placeholder="اكتب ملاحظتك هنا..."></textarea>
+                    <div class="form-controls">
+                        <select id="noteCategory" class="category-select">
+                            <option value="عام">عام</option>
+                            <option value="هام">هام</option>
+                            <option value="سؤال">سؤال</option>
+                            <option value="فكرة">فكرة</option>
+                            <option value="ملخص">ملخص</option>
+                        </select>
+                        <button id="saveNote" class="btn btn-success">
+                            <i class="fas fa-save"></i>
+                            <span>حفظ الملاحظة</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="export-options">
+                    <button id="exportTxt" class="btn btn-secondary">
+                        <i class="fas fa-file-alt"></i>
+                        <span>تصدير نصي</span>
+                    </button>
+                    <button id="exportPdf" class="btn btn-secondary">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>تصدير PDF</span>
+                    </button>
+                    <button id="clearNotes" class="btn btn-warning">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>مسح الكل</span>
+                    </button>
+                </div>
+            </section>
+            
+            <section class="notes-section">
+                <h2 class="section-title">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>ملاحظاتي</span>
+                </h2>
+                <div class="notes-list" id="notesList">
+                    <div class="empty-notes" id="emptyNotes">
+                        <i class="far fa-clipboard"></i>
+                        <p>لا توجد ملاحظات حتى الآن. ابدأ بإضافة ملاحظتك الأولى!</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-video"></i>
+            <span>الفيديو</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-sticky-note"></i>
+            <span>الملاحظات</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-cog"></i>
+            <span>الإعدادات</span>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoUrlInput = document.getElementById('videoUrl');
+            const loadVideoBtn = document.getElementById('loadVideo');
+            const captureTimeBtn = document.getElementById('captureTime');
+            const currentTimeDisplay = document.getElementById('currentTime');
+            const noteText = document.getElementById('noteText');
+            const noteCategory = document.getElementById('noteCategory');
+            const saveNoteBtn = document.getElementById('saveNote');
+            const notesList = document.getElementById('notesList');
+            const emptyNotes = document.getElementById('emptyNotes');
+            const exportTxtBtn = document.getElementById('exportTxt');
+            const exportPdfBtn = document.getElementById('exportPdf');
+            const clearNotesBtn = document.getElementById('clearNotes');
+            
+            // متغيرات التطبيق
+            let notes = JSON.parse(localStorage.getItem('videoNotes')) || [];
+            let currentTimestamp = '00:00:00';
+            
+            // تحديث الوقت الحالي للفيديو
+            videoPlayer.addEventListener('timeupdate', function() {
+                const time = formatTime(videoPlayer.currentTime);
+                currentTimeDisplay.textContent = time;
+                currentTimestamp = time;
+            });
+            
+            // تحميل الفيديو من الرابط
+            loadVideoBtn.addEventListener('click', function() {
+                const url = videoUrlInput.value.trim();
+                if (url) {
+                    // محاكاة لتحميل فيديو (في تطبيق حقيقي، ستحتاج لمعالجة روابط YouTube وغيرها)
+                    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                        alert('لتحميل فيديو من YouTube، تحتاج لتطبيق حقيقي مع واجهة برمجة YouTube.');
+                        return;
+                    }
+                    
+                    videoPlayer.src = url;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(e => console.log('التشغيل التلقائي غير مسموح:', e));
+                } else {
+                    alert('يرجى إدخال رابط الفيديو');
+                }
+            });
+            
+            // التقاط الوقت الحالي
+            captureTimeBtn.addEventListener('click', function() {
+                if (noteText.value.includes('[')) {
+                    noteText.value = noteText.value.replace(/\[\d{2}:\d{2}:\d{2}\]/, `[${currentTimestamp}]`);
+                } else {
+                    noteText.value = `[${currentTimestamp}] ${noteText.value}`;
+                }
+                
+                // إضافة تأثير مرئي
+                captureTimeBtn.style.backgroundColor = '#3a0ca3';
+                setTimeout(() => {
+                    captureTimeBtn.style.backgroundColor = '';
+                }, 300);
+            });
+            
+            // حفظ الملاحظة
+            saveNoteBtn.addEventListener('click', function() {
+                const text = noteText.value.trim();
+                const category = noteCategory.value;
+                
+                if (!text) {
+                    alert('يرجى إدخال نص الملا
